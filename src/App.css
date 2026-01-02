@@ -1,0 +1,82 @@
+/* Reset CSS */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+img {
+  max-width: 100%;
+}
+
+/* Custom CSS */
+header {
+  padding-block: 30px;
+}
+.app_name {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+.app_tagline {
+  text-align: center;
+  font-style: italic;
+  padding-top: 10px;
+  font-size: 25px;
+
+}
+.add_todo_inp {
+  text-align: end;
+}
+.video_wrap {
+ display: grid;
+ height: calc(100vh - 175px);
+ width: 100%;
+ place-items: center;
+}
+.todo_items_wrap {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 20px;
+  padding: 10px;
+}
+.todo_item {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 15px;
+    grid-column: span 3/span 3;
+    box-shadow: 0 0 10px #000;
+}
+main {
+  height: calc(100vh - 205px);
+  overflow-y: scroll;
+  scrollbar-width: none;
+}
+.no_data_video {
+  width: 250px;
+}
+.wrapper {
+  background-color: #f1ece6;
+  padding-inline: 60px;
+  padding-bottom: 30px;
+}
+.todo_logo {
+  width: 40px;
+  height: auto;
+}
+.todo_title {
+    font-size: 20px;
+}
+.todo_desc {
+  padding-top: 10px;
+}
+.add_todo_title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.add_todo_btns {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  padding-top: 20px;
+}
