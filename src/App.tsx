@@ -64,17 +64,7 @@ function App() {
 
   const [currentState, dispatch] = useReducer(todoReducer, todoInitialValues);
 
-  const addTodo = () => {
-    dispatch({
-      type: "ADD",
-      payload: {
-        id: Date.now(),
-        title: "dd",
-        description: "dddd",
-      },
-    });
-    closeAddModal();
-  };
+
   return (
     <div className="wrapper">
       <header>
