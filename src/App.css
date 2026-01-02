@@ -21,17 +21,17 @@ header {
   text-align: center;
   font-style: italic;
   padding-top: 10px;
-  font-size: 25px;
-
+  font-size: clamp(14px, 1.3vw, 25px);
 }
 .add_todo_inp {
   text-align: end;
 }
 .video_wrap {
- display: grid;
- height: calc(100vh - 175px);
- width: 100%;
- place-items: center;
+  display: grid;
+  height: calc(100vh - 230px);
+  width: 100%;
+  place-items: center;
+  grid-column: span 12/ span 12;
 }
 .todo_items_wrap {
   display: grid;
@@ -40,11 +40,11 @@ header {
   padding: 10px;
 }
 .todo_item {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 15px;
-    grid-column: span 3/span 3;
-    box-shadow: 0 0 10px #000;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 15px;
+  grid-column: span 3/span 3;
+  box-shadow: 0 0 10px #000;
 }
 main {
   height: calc(100vh - 205px);
@@ -64,7 +64,7 @@ main {
   height: auto;
 }
 .todo_title {
-    font-size: 20px;
+  font-size: 20px;
 }
 .todo_desc {
   padding-top: 10px;
@@ -79,4 +79,82 @@ main {
   gap: 15px;
   justify-content: center;
   padding-top: 20px;
+}
+.icon_wrap {
+  display: flex;
+  gap: 9px;
+  justify-content: flex-end;
+  position: relative;
+  top: -10px;
+  right: -10px;
+}
+.icon_wrap button {
+  padding: 0;
+}
+.error_wrap {
+  font-size: 14px;
+  height: 18px;
+  display: block;
+  width: 100%;
+  padding-top: 3px;
+}
+.error_wrap p {
+  font-size: 14px;
+  height: 18px;
+}
+
+/* Responsive Styles  */
+@media(max-width: 1300px) {
+  .todo_item {
+    grid-column: span 4 / span 4;
+  }
+  .wrapper {
+    padding-inline: 40px;
+  }
+}
+@media(max-width: 900px) {
+  .todo_item {
+    grid-column: span 6 / span 6;
+  }
+}
+@media(max-width: 600px) {
+  .todo_item {
+    grid-column: span 12;
+  }
+  .wrapper {
+    padding-inline: 30px;
+  }
+  header {
+    padding-block: 20px;
+  }
+  .add_todo_wrap {
+    margin-top: 15px;
+  }
+  .add_todo_inp button {
+    width: 100%;
+    border-radius: 15px;
+  }
+  .app_name {
+    font-size: 30px;
+  }
+  .todo_logo {
+    width: 31px;
+  }
+  main {
+    height: calc(100vh - 185px);
+  }
+  .add_todo_title h6 {
+    font-size: 16px;
+  }
+  form input, form textarea {
+    font-size: 14px !important;
+  }
+  .delete_todo_tx {
+    font-size: 18px !important;
+  }
+}
+@media(max-width: 400px) {
+  .wrapper {
+    padding-inline: 15px;
+  }
 }

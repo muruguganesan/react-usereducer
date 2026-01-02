@@ -3,19 +3,33 @@ import Button from "@mui/material/Button";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import notes from "../public/assets/notes.png";
 import { useReducer, useState } from "react";
-import { Box, IconButton, Modal, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  IconButton,
+  Modal,
+  Snackbar,
+  Typography,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import TextField from "@mui/material/TextField";
 
 import { Formik, Field, Form } from "formik";
 
 import type { FieldProps } from "formik";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditNoteIcon from "@mui/icons-material/EditNote";
 
+import type { AlertColor } from "@mui/material/Alert";
+
+import { useMediaQuery } from "react-responsive";
+
+import * as Yup from "yup";
 
 type TodoInitialValuesType = {
   id: number;
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
 };
 
 type TodoActionType = {
@@ -41,29 +55,90 @@ const todoInitialValues = [
   },
 ];
 
-// todoItemsJson = [];
-
-const todoReducer = (
-  state: TodoInitialValuesType[],
-  action: TodoActionType
-): TodoInitialValuesType[] => {
-  switch (action.type) {
-    case "ADD":
-      return [...state, action.payload];
-
-    default:
-      return state;
-  }
-};
-
 function App() {
   const [openAddModal, setOpenAddModal] = useState(false);
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [deleteTodoId, setDeleteTodoId] = useState<number>(0);
+  const [snackBarText, setSnackBarText] = useState(
+    "Todo Deleted Successfully !!!"
+  );
+  const [openSnackBar, setOpenSnackbar] = useState(false);
+  const [toastType, setToastType] = useState<AlertColor>("success");
+  const [addEditModalTitle, setAddEditModalTitle] = useState("Add New");
+  const [formInitialValues, setFormInitialValues] = useState({
+    title: "",
+    description: "",
+  });
+  const [formModalType, setFormModalType] = useState("add");
+  const [editTodoItem, setEditTodoItem] = useState(0);
 
-  const handleAddTodo = () => setOpenAddModal(true);
-  const closeAddModal = () => setOpenAddModal(false);
+  const handleAddTodo = () => {
+    setFormInitialValues({
+      title: "",
+      description: "",
+    });
+    setFormModalType("add");
+    setAddEditModalTitle("Add New");
+    setOpenAddModal(true);
+  };
+  const closeAddModal = () => {
+    setOpenAddModal(false);
+  };
+  const openDeleteModalFn = () => setOpenDeleteModal(true);
+  const closeDeleteModalFn = () => setOpenDeleteModal(false);
+
+  const todoReducer = (
+    state: TodoInitialValuesType[],
+    action: TodoActionType
+  ): TodoInitialValuesType[] => {
+    switch (action.type) {
+      case "ADD":
+        return [...state, action.payload];
+      case "DELETE":
+        return state.filter((ele) => ele.id !== action.payload.id);
+      case "UPDATE":
+        return state.map((ele) => {
+          if (ele.id === action.payload.id) {
+            return {
+              id: ele.id,
+              title: action.payload.title,
+              description: action.payload.description,
+            };
+          }
+          return ele;
+        });
+
+      default:
+        return state;
+    }
+  };
 
   const [currentState, dispatch] = useReducer(todoReducer, todoInitialValues);
 
+  const deleteTodoFn = () => {
+    setSnackBarText("Notes Deleted Successfully !!!");
+    setToastType("error");
+    dispatch({ type: "DELETE", payload: { id: deleteTodoId } });
+    closeDeleteModalFn();
+    setOpenSnackbar(true);
+  };
+  const closeSnackbar = () => setOpenSnackbar(false);
+  const editModalOpen = (id: number) => {
+    setEditTodoItem(id);
+    setFormModalType("edit");
+
+    const actualItem: any = currentState.filter((ele) => ele.id === id)[0];
+    setFormInitialValues(actualItem);
+
+    setAddEditModalTitle("Edit");
+    setOpenAddModal(true);
+  };
+  const isMobilePortrait = useMediaQuery({ query: "(max-width: 400px)" });
+
+  const addFormValidationSchema = Yup.object({
+    title: Yup.string().required("Title is Required"),
+    description: Yup.string().required("Description is Required"),
+  });
 
   return (
     <div className="wrapper">
@@ -92,6 +167,24 @@ function App() {
             <>
               {currentState.map((ele) => (
                 <div className="todo_item" key={ele.id}>
+                  <div className="icon_wrap">
+                    <IconButton
+                      aria-label="delete"
+                      onClick={() => {
+                        setDeleteTodoId(ele.id);
+                        openDeleteModalFn();
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                    <IconButton
+                      aria-label="edit"
+                      onClick={() => editModalOpen(ele.id)}
+                    >
+                      <EditNoteIcon />
+                    </IconButton>
+                  </div>
+
                   <h6 className="todo_title">{ele.title}</h6>
                   <p className="todo_desc">{ele.description}</p>
                 </div>
@@ -119,7 +212,7 @@ function App() {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 400,
+            width: isMobilePortrait ? 300 : 400,
             bgcolor: "background.paper",
             borderRadius: 2,
             boxShadow: 24,
@@ -127,28 +220,50 @@ function App() {
           }}
         >
           <Formik
-            initialValues={{ title: "", description: "" }}
-
+            initialValues={formInitialValues}
+            validationSchema={addFormValidationSchema}
             onSubmit={(values) => {
-              console.log("values", values);
-              dispatch({
-                type: "ADD",
-                payload: {id: Date.now(), ...values},
-              });
+              setToastType("success");
+
+              if (formModalType === "add") {
+                setSnackBarText("Notes Added Successfully !!!");
+                dispatch({
+                  type: "ADD",
+                  payload: { id: Date.now(), ...values },
+                });
+              } else {
+                setSnackBarText("Notes Updated Successfully !!!");
+                dispatch({
+                  type: "UPDATE",
+                  payload: { id: editTodoItem, ...values },
+                });
+              }
+
               closeAddModal();
+              setOpenSnackbar(true);
+              setFormInitialValues({ title: "", description: "" });
             }}
           >
-            {({ isSubmitting }) => (
+            {({ isSubmitting, errors }) => (
               <Form>
                 <div className="add_todo_title">
-                  <Typography variant="h6">Add New Note</Typography>
+                  <Typography variant="h5">{addEditModalTitle} Note</Typography>
                   <IconButton aria-label="close" onClick={closeAddModal}>
                     <CloseIcon />
                   </IconButton>
                 </div>
 
                 <Field component={Title} name="title" value="title" />
+                <span className="error_wrap">
+                {errors.title && <Typography variant="body1" color="error">{errors.title}</Typography>}
+
+                </span>
                 <Field component={Description} name="description" />
+                <span className="error_wrap">
+                {errors.description && <Typography variant="body1" color="error">{errors.description}</Typography>}
+
+                </span>
+
 
                 <div className="add_todo_btns">
                   <Button
@@ -172,6 +287,58 @@ function App() {
           </Formik>
         </Box>
       </Modal>
+      {/* Delete Modal */}
+      <Modal open={openDeleteModal} onClose={closeDeleteModalFn}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: isMobilePortrait ? 300 : 400,
+            bgcolor: "background.paper",
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 3,
+          }}
+        >
+          <div className="add_todo_title">
+            <Typography variant="h5">Delete Todo</Typography>
+            <IconButton aria-label="close" onClick={closeDeleteModalFn}>
+              <CloseIcon />
+            </IconButton>
+          </div>
+          <Typography variant="h6" className="delete_todo_tx">
+            Are you sure you want to delete?
+          </Typography>
+          <div className="add_todo_btns">
+            <Button variant="outlined" onClick={closeDeleteModalFn}>
+              Cancel
+            </Button>
+            <Button variant="contained" onClick={deleteTodoFn} color="error">
+              Delete
+            </Button>
+          </div>
+        </Box>
+      </Modal>
+
+      {/* Snackbar */}
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={openSnackBar}
+        message={snackBarText}
+        autoHideDuration={1200}
+        onClose={closeSnackbar}
+      >
+        <Alert
+          onClose={closeSnackbar}
+          severity={toastType}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackBarText}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }
@@ -179,7 +346,6 @@ function App() {
 export default App;
 
 const Title = ({ field }: FieldProps) => {
-
   return (
     <TextField
       {...field}
@@ -192,15 +358,16 @@ const Title = ({ field }: FieldProps) => {
 };
 
 const Description = ({ field }: FieldProps) => {
+  const isMobilePortrait = useMediaQuery({ query: "(max-width: 600px)" });
   return (
     <TextField
       {...field}
-
       label="Description"
       type="text"
       multiline
-      rows={4}
+      rows={isMobilePortrait ? 2 : 4}
       sx={{ mt: 3, width: "100%" }}
       name="description"
     />
-  )}
+  );
+};
